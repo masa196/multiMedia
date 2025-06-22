@@ -8,7 +8,7 @@ public class SimplePriorityQueue
     public void Enqueue(HuffmanNode node)
     {
         nodes.Add(node);
-        nodes = nodes.OrderBy(n => n.Frequency).ToList(); // Sort by frequency
+        nodes = nodes.OrderBy(n => n.Frequency).ToList();
     }
 
     public HuffmanNode Dequeue()

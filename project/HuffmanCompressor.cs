@@ -2,31 +2,33 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-
-public class HuffmanNode
-{
-    public char? Symbol;
-    public int Frequency;
-    public HuffmanNode Left;
-    public HuffmanNode Right;
-}
+using System.Threading;
 
 public class HuffmanCompressor
 {
-    private Dictionary<char, string> codes = new Dictionary<char, string>();
+    private Dictionary<byte, string> codes = new Dictionary<byte, string>();
+    private ManualResetEventSlim pauseEvent;
+
+    public HuffmanCompressor(ManualResetEventSlim pauseEvent)
+    {
+        this.pauseEvent = pauseEvent;
+    }
 
     public void Compress(string inputPath, string outputPath)
     {
-        string text = File.ReadAllText(inputPath);
-        var frequencies = text.GroupBy(c => c)
-                              .ToDictionary(g => g.Key, g => g.Count());
+        byte[] data = File.ReadAllBytes(inputPath);
+        var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
 
         HuffmanNode root = BuildTree(frequencies);
         GenerateCodes(root, "");
 
         using (var writer = new BinaryWriter(File.Open(outputPath, FileMode.Create)))
         {
+            // 🟢 1. حفظ الامتداد الأصلي
+            string extension = Path.GetExtension(inputPath);
+            writer.Write(extension);
+
+            // 🟢 2. حفظ جدول التكرارات
             writer.Write(frequencies.Count);
             foreach (var pair in frequencies)
             {
@@ -34,33 +36,56 @@ public class HuffmanCompressor
                 writer.Write(pair.Value);
             }
 
-            string encoded = string.Concat(text.Select(c => codes[c]));
+            // 🟢 3. تشفير البيانات
+            var encodedBuilder = new System.Text.StringBuilder();
+            int count = 0;
+
+            foreach (byte b in data)
+            {
+                pauseEvent.Wait();
+
+                encodedBuilder.Append(codes[b]);
+                count++;
+
+                if (count % 1000 == 0)
+                    System.Windows.Forms.Application.DoEvents();
+            }
+
+            string encoded = encodedBuilder.ToString();
             BitWriter.WriteBits(writer, encoded);
         }
     }
 
-    public void Decompress(string compressedPath, string outputPath)
+    public void Decompress(string compressedPath, string outputPath = null)
     {
         using (var reader = new BinaryReader(File.Open(compressedPath, FileMode.Open)))
         {
+            // 🟢 1. قراءة الامتداد الأصلي
+            string extension = reader.ReadString();
+
+            // 🟢 2. استعادة جدول التكرارات
             int symbolCount = reader.ReadInt32();
-            var frequencies = new Dictionary<char, int>();
+            var frequencies = new Dictionary<byte, int>();
 
             for (int i = 0; i < symbolCount; i++)
             {
-                char symbol = reader.ReadChar();
+                byte symbol = reader.ReadByte();
                 int freq = reader.ReadInt32();
                 frequencies[symbol] = freq;
             }
 
+            // 🟢 3. بناء الشجرة وفك التشفير
             HuffmanNode root = BuildTree(frequencies);
             string bitString = BitWriter.ReadBits(reader);
-            string result = Decode(root, bitString);
-            File.WriteAllText(outputPath, result);
+            byte[] result = Decode(root, bitString);
+
+            // 🟢 4. حفظ الملف بالامتداد الأصلي
+            string actualOutputPath = outputPath ?? Path.ChangeExtension(compressedPath, extension);
+            File.WriteAllBytes(actualOutputPath, result);
         }
     }
 
-    private HuffmanNode BuildTree(Dictionary<char, int> frequencies)
+    private HuffmanNode BuildTree(Dictionary<byte, int> frequencies)
     {
         var queue = new SimplePriorityQueue();
 
@@ -98,13 +123,16 @@ public class HuffmanCompressor
         }
     }
 
-    private string Decode(HuffmanNode root, string bits)
+    private byte[] Decode(HuffmanNode root, string bits)
     {
-        var result = new List<char>();
+        var result = new List<byte>();
         var node = root;
 
+        int count = 0;
         foreach (char bit in bits)
         {
+            pauseEvent.Wait();
+
             node = bit == '0' ? node.Left : node.Right;
 
             if (node.Symbol != null)
@@ -112,8 +140,20 @@ public class HuffmanCompressor
                 result.Add(node.Symbol.Value);
                 node = root;
             }
+
+            count++;
+            if (count % 1000 == 0)
+                System.Windows.Forms.Application.DoEvents();
         }
 
-        return new string(result.ToArray());
+        return result.ToArray();
     }
+}
+
+public class HuffmanNode
+{
+    public byte? Symbol;
+    public int Frequency;
+    public HuffmanNode Left;
+    public HuffmanNode Right;
 }

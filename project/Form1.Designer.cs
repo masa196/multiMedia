@@ -7,6 +7,8 @@
         private System.Windows.Forms.Button btnBrowse;
         private System.Windows.Forms.Button btnCompress;
         private System.Windows.Forms.Button btnDecompress;
+        private System.Windows.Forms.Button btnStop;
+
 
         protected override void Dispose(bool disposing)
         {
@@ -64,8 +66,34 @@
             this.btnDecompress.UseVisualStyleBackColor = true;
             this.btnDecompress.Click += new System.EventHandler(this.btnDecompress_Click);
             // 
-            // Form1
+            // btnStop
             // 
+            this.btnStop = new System.Windows.Forms.Button();
+            this.btnStop.Location = new System.Drawing.Point(230, 50);
+            this.btnStop.Name = "btnStop";
+            this.btnStop.Size = new System.Drawing.Size(100, 23);
+            this.btnStop.TabIndex = 4;
+            this.btnStop.Text = "إيقاف";
+            this.btnStop.UseVisualStyleBackColor = true;
+            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            this.Controls.Add(this.btnStop);
+            this.btnStop.Enabled = false;
+
+            // 
+            // Form1
+            //
+            this.lblStatus = new System.Windows.Forms.Label();
+
+            // خصائص lblStatus
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.Location = new System.Drawing.Point(340, 55);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(0, 13);
+            this.lblStatus.TabIndex = 5;
+
+            // إضافة العناصر إلى النموذج
+            this.Controls.Add(this.lblStatus);
+        
             this.ClientSize = new System.Drawing.Size(640, 100);
             this.Controls.Add(this.txtFilePath);
             this.Controls.Add(this.btnBrowse);
