@@ -1,43 +1,46 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-class BitWriter
+public static class BitWriter
 {
     public static void WriteBits(BinaryWriter writer, string bits)
     {
-        byte buffer = 0;
-        int bitCount = 0;
-
-        foreach (char bit in bits)
+        List<byte> bytes = new List<byte>();
+        int index = 0;
+        while (index < bits.Length)
         {
-            if (bit == '1')
-                buffer |= (byte)(1 << (7 - bitCount));
-            bitCount++;
-
-            if (bitCount == 8)
+            byte b = 0;
+            for (int i = 0; i < 8 && index < bits.Length; i++)
             {
-                writer.Write(buffer);
-                buffer = 0;
-                bitCount = 0;
+                if (bits[index] == '1')
+                    b |= (byte)(1 << (7 - i));
+                index++;
             }
+            bytes.Add(b);
         }
 
-        if (bitCount > 0)
-            writer.Write(buffer);
+        writer.Write(bits.Length);
+        writer.Write(bytes.ToArray());
     }
 
     public static string ReadBits(BinaryReader reader)
     {
-        var sb = new StringBuilder();
-        while (reader.BaseStream.Position < reader.BaseStream.Length)
+        int bitCount = reader.ReadInt32();
+        byte[] bytes = reader.ReadBytes((bitCount + 7) / 8);
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < bytes.Length; i++)
         {
-            byte b = reader.ReadByte();
-            for (int i = 7; i >= 0; i--)
+            for (int j = 7; j >= 0; j--)
             {
-                sb.Append(((b >> i) & 1) == 1 ? '1' : '0');
+                bool bit = (bytes[i] & (1 << j)) != 0;
+                sb.Append(bit ? '1' : '0');
+                if (sb.Length == bitCount)
+                    break;
             }
         }
+
         return sb.ToString();
     }
 }
