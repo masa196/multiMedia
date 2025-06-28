@@ -36,7 +36,7 @@ namespace project
 //                         "\"الحياة ليست شيئًا يمكن أن يُفهم في يوم وليلة، ولكن إن بدأت بالسؤال، فقد سلكت الطريق الصحيح.\"\n";
 
 //    string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-//    string filePath = Path.Combine(desktopPath, "test_large2.txt");
+//    string filePath = Path.Combine(desktopPath, "test_large2.txt");3
 
 //    using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
 //    {

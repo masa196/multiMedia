@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-public class HuffmanCompressor
+public class HuffmanCompressor : ICompressor
 {
     private Dictionary<byte, string> codes = new Dictionary<byte, string>();
     private ManualResetEventSlim pauseEvent;

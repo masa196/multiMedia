@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Windows.Forms;
 
 public static class BitWriter
 {
@@ -8,6 +9,7 @@ public static class BitWriter
     {
         List<byte> bytes = new List<byte>();
         int index = 0;
+
         while (index < bits.Length)
         {
             byte b = 0;
@@ -22,24 +24,31 @@ public static class BitWriter
 
         writer.Write(bits.Length);
         writer.Write(bytes.ToArray());
+
+        // ✅ Debug
+        MessageBox.Show($"✅ WriteBits: عدد البتات = {bits.Length}, عدد البايتات = {bytes.Count}");
     }
 
     public static string ReadBits(BinaryReader reader)
     {
         int bitCount = reader.ReadInt32();
         byte[] bytes = reader.ReadBytes((bitCount + 7) / 8);
-        StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < bytes.Length; i++)
+        StringBuilder sb = new StringBuilder(bitCount);
+        int totalBits = 0;
+
+        foreach (byte b in bytes)
         {
-            for (int j = 7; j >= 0; j--)
+            for (int j = 7; j >= 0 && totalBits < bitCount; j--)
             {
-                bool bit = (bytes[i] & (1 << j)) != 0;
+                bool bit = (b & (1 << j)) != 0;
                 sb.Append(bit ? '1' : '0');
-                if (sb.Length == bitCount)
-                    break;
+                totalBits++;
             }
         }
+
+        // ✅ Debug
+        MessageBox.Show($"📥 ReadBits: تم تحميل {bitCount} بت ({bytes.Length} بايت)\nbitString.Length = {sb.Length}");
 
         return sb.ToString();
     }

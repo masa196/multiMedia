@@ -15,6 +15,7 @@
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblResultMessage;
         private System.Windows.Forms.ComboBox comboMode;
+        private System.Windows.Forms.ComboBox comboAlgorithm; 
 
         protected override void Dispose(bool disposing)
         {
@@ -38,16 +39,18 @@
             this.btnExtractOne = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.comboMode = new System.Windows.Forms.ComboBox();
+            this.comboAlgorithm = new System.Windows.Forms.ComboBox();
             this.lblStatus = new System.Windows.Forms.Label();
             this.lblResultMessage = new System.Windows.Forms.Label();
+            this.SuspendLayout();
 
             // 
             // listBoxFiles
             // 
             this.listBoxFiles.Location = new System.Drawing.Point(12, 12);
             this.listBoxFiles.Name = "listBoxFiles";
-            this.listBoxFiles.Size = new System.Drawing.Size(500, 80);
             this.listBoxFiles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listBoxFiles.Size = new System.Drawing.Size(500, 69);
             this.listBoxFiles.TabIndex = 0;
 
             // 
@@ -71,6 +74,19 @@
             this.btnDeleteSelected.Text = "حذف المحدد";
             this.btnDeleteSelected.UseVisualStyleBackColor = true;
             this.btnDeleteSelected.Click += new System.EventHandler(this.btnDeleteSelected_Click);
+
+            // 
+            // comboAlgorithm
+            // 
+            this.comboAlgorithm.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboAlgorithm.Items.AddRange(new object[] {
+            "Huffman",
+            "Shannon-Fano"});
+            this.comboAlgorithm.Location = new System.Drawing.Point(450, 90);
+            this.comboAlgorithm.Name = "comboAlgorithm";
+            this.comboAlgorithm.Size = new System.Drawing.Size(170, 21);
+            this.comboAlgorithm.TabIndex = 11;
+            this.comboAlgorithm.SelectedIndex = 0;
 
             // 
             // btnCompress
@@ -97,6 +113,7 @@
             // 
             // btnStop
             // 
+            this.btnStop.Enabled = false;
             this.btnStop.Location = new System.Drawing.Point(230, 100);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(100, 23);
@@ -104,7 +121,6 @@
             this.btnStop.Text = "إيقاف";
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
-            this.btnStop.Enabled = false;
 
             // 
             // btnExtractOne
@@ -118,14 +134,25 @@
             this.btnExtractOne.Click += new System.EventHandler(this.btnExtractOne_Click);
 
             // 
+            // btnCancel
+            // 
+            this.btnCancel.Enabled = false;
+            this.btnCancel.Location = new System.Drawing.Point(340, 130);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(100, 23);
+            this.btnCancel.TabIndex = 10;
+            this.btnCancel.Text = "إلغاء العملية";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+
+            // 
             // comboMode
             // 
             this.comboMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboMode.Items.AddRange(new object[] {
-                "ضغط كل ملف بشكل منفصل",
-                "ضغط الملفات كأرشيف واحد"});
-            this.comboMode.SelectedIndex = 0;
-            this.comboMode.Location = new System.Drawing.Point(450, 100);
+            "ضغط كل ملف بشكل منفصل",
+            "ضغط الملفات كأرشيف واحد"});
+            this.comboMode.Location = new System.Drawing.Point(450, 130);
             this.comboMode.Name = "comboMode";
             this.comboMode.Size = new System.Drawing.Size(170, 21);
             this.comboMode.TabIndex = 7;
@@ -150,21 +177,6 @@
             this.lblResultMessage.Size = new System.Drawing.Size(0, 15);
             this.lblResultMessage.TabIndex = 9;
 
-
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.Location = new System.Drawing.Point(450, 130);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(100, 23);
-            this.btnCancel.TabIndex = 10;
-            this.btnCancel.Text = "إلغاء العملية";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            this.btnCancel.Enabled = false;
-
-
-
             // 
             // Form1
             // 
@@ -177,11 +189,13 @@
             this.Controls.Add(this.btnStop);
             this.Controls.Add(this.btnExtractOne);
             this.Controls.Add(this.comboMode);
+            this.Controls.Add(this.comboAlgorithm); 
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.lblResultMessage);
             this.Name = "Form1";
             this.Text = "ضغط وفك ضغط باستخدام هوفمان";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
         }
