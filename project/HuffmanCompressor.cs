@@ -1,5 +1,4 @@
-﻿// ✅ ملف HuffmanCompressor.cs بعد إضافة دعم الإلغاء
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,26 +9,32 @@ public class HuffmanCompressor
 {
     private Dictionary<byte, string> codes = new Dictionary<byte, string>();
     private ManualResetEventSlim pauseEvent;
+    private Func<bool> isCancelledFunc;
 
-    public HuffmanCompressor(ManualResetEventSlim pauseEvent)
+    public HuffmanCompressor(ManualResetEventSlim pauseEvent, Func<bool> isCancelledFunc = null)
     {
         this.pauseEvent = pauseEvent;
+        this.isCancelledFunc = isCancelledFunc;
     }
 
-    public double CompressSingleFile(string inputPath, string outputPath, CancellationToken token)
+    // ✅ ضغط ملف واحد فقط (القديم)
+    public double CompressSingleFile(string inputPath, string outputPath)
+{
+    byte[] data = File.ReadAllBytes(inputPath);
+    var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
+
+    HuffmanNode root = BuildTree(frequencies);
+    GenerateCodes(root, "");
+
+    try
     {
-        byte[] data = File.ReadAllBytes(inputPath);
-        var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
-
-        HuffmanNode root = BuildTree(frequencies);
-        GenerateCodes(root, "");
-
-        using (var writer = new BinaryWriter(File.Open(outputPath, FileMode.Create)))
+        using (var stream = File.Open(outputPath, FileMode.Create))
+        using (var writer = new BinaryWriter(stream))
         {
             string extension = Path.GetExtension(inputPath);
             writer.Write(extension);
-
             writer.Write(frequencies.Count);
+
             foreach (var pair in frequencies)
             {
                 writer.Write(pair.Key);
@@ -41,38 +46,57 @@ public class HuffmanCompressor
             foreach (byte b in data)
             {
                 pauseEvent.Wait();
-                if (token.IsCancellationRequested) return -1;
+                if (isCancelledFunc != null && isCancelledFunc())
+                    throw new OperationCanceledException();  // ✅ نرمي استثناء لإلغاء
+
                 encodedBuilder.Append(codes[b]);
                 count++;
                 if (count % 1000 == 0)
                     System.Windows.Forms.Application.DoEvents();
             }
+
+            // ✅ تحقق من الإلغاء قبل الكتابة النهائية
+            if (isCancelledFunc != null && isCancelledFunc())
+                throw new OperationCanceledException();
+
             BitWriter.WriteBits(writer, encodedBuilder.ToString());
         }
-
-        long originalSize = new FileInfo(inputPath).Length;
-        long compressedSize = new FileInfo(outputPath).Length;
-        return 100.0 * (1 - (compressedSize / (double)originalSize));
+    }
+    catch (OperationCanceledException)
+    {
+        if (File.Exists(outputPath))
+            File.Delete(outputPath); // ✅ حذف الملف الناتج
+        return 0;
     }
 
-    public double CompressMultipleFiles(string[] inputFiles, string outputPath, CancellationToken token)
+    long originalSize = new FileInfo(inputPath).Length;
+    long compressedSize = new FileInfo(outputPath).Length;
+    return 100.0 * (1 - (compressedSize / (double)originalSize));
+}
+
+
+    // ✅ ضغط عدة ملفات في ملف واحد
+    public double CompressMultipleFiles(string[] inputFiles, string outputPath)
+{
+    var allBytes = new List<byte>();
+    var fileMeta = new List<(string name, int size)>();
+
+    foreach (string file in inputFiles)
     {
-        var allBytes = new List<byte>();
-        var fileMeta = new List<(string name, int size)>();
+        byte[] content = File.ReadAllBytes(file);
+        fileMeta.Add((Path.GetFileName(file), content.Length));
+        allBytes.AddRange(content);
+    }
 
-        foreach (string file in inputFiles)
-        {
-            byte[] content = File.ReadAllBytes(file);
-            fileMeta.Add((Path.GetFileName(file), content.Length));
-            allBytes.AddRange(content);
-        }
+    var data = allBytes.ToArray();
+    var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
+    HuffmanNode root = BuildTree(frequencies);
+    GenerateCodes(root, "");
 
-        var data = allBytes.ToArray();
-        var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
-        HuffmanNode root = BuildTree(frequencies);
-        GenerateCodes(root, "");
-
-        using (var writer = new BinaryWriter(File.Open(outputPath, FileMode.Create)))
+    try
+    {
+        using (var stream = File.Open(outputPath, FileMode.Create))
+        using (var writer = new BinaryWriter(stream))
         {
             writer.Write(fileMeta.Count);
             foreach (var (name, size) in fileMeta)
@@ -93,144 +117,167 @@ public class HuffmanCompressor
             foreach (byte b in data)
             {
                 pauseEvent.Wait();
-                if (token.IsCancellationRequested) return -1;
+
+                if (isCancelledFunc != null && isCancelledFunc())
+                    throw new OperationCanceledException();
+
                 encodedBuilder.Append(codes[b]);
                 count++;
                 if (count % 1000 == 0)
                     System.Windows.Forms.Application.DoEvents();
             }
+
+            if (isCancelledFunc != null && isCancelledFunc())
+                throw new OperationCanceledException();
+
             BitWriter.WriteBits(writer, encodedBuilder.ToString());
         }
-
-        long originalSize = data.Length;
-        long compressedSize = new FileInfo(outputPath).Length;
-        return 100.0 * (1 - (compressedSize / (double)originalSize));
+    }
+    catch (OperationCanceledException)
+    {
+        if (File.Exists(outputPath))
+            File.Delete(outputPath); // حذف الأرشيف إذا أُلغي
+        return 0;
     }
 
-    public void DecompressSingleFile(string compressedPath, string outputPath = null, CancellationToken token = default)
+    long originalSize = data.Length;
+    long compressedSize = new FileInfo(outputPath).Length;
+    return 100.0 * (1 - (compressedSize / (double)originalSize));
+}
+
+    // ✅ فك ملف واحد (القديم)
+    public void DecompressSingleFile(string compressedPath, string outputPath = null)
+{
+    using (var reader = new BinaryReader(File.Open(compressedPath, FileMode.Open)))
     {
-        using (var reader = new BinaryReader(File.Open(compressedPath, FileMode.Open)))
+        string extension = reader.ReadString();
+
+        int symbolCount = reader.ReadInt32();
+        var frequencies = new Dictionary<byte, int>();
+        for (int i = 0; i < symbolCount; i++)
         {
-            string extension = reader.ReadString();
-            int symbolCount = reader.ReadInt32();
-            var frequencies = new Dictionary<byte, int>();
-            for (int i = 0; i < symbolCount; i++)
+            byte symbol = reader.ReadByte();
+            int freq = reader.ReadInt32();
+            frequencies[symbol] = freq;
+        }
+
+        HuffmanNode root = BuildTree(frequencies);
+        string bitString = BitWriter.ReadBits(reader);
+
+        if (isCancelledFunc != null && isCancelledFunc())
+            return;
+
+        byte[] result = Decode(root, bitString);
+
+        if (isCancelledFunc != null && isCancelledFunc())
+            return;
+
+        string actualOutputPath = outputPath ?? Path.ChangeExtension(compressedPath, extension);
+        File.WriteAllBytes(actualOutputPath, result);
+    }
+}
+
+    // ✅ فك ملف الأرشيف المتعدد
+    public void DecompressArchive(string archivePath, string outputFolder = null)
+{
+    outputFolder = outputFolder ?? Path.Combine(
+        Path.GetDirectoryName(archivePath),
+        Path.GetFileNameWithoutExtension(archivePath) + "_Extracted"
+    );
+
+    if (!Directory.Exists(outputFolder))
+        Directory.CreateDirectory(outputFolder);
+
+    using (var reader = new BinaryReader(File.Open(archivePath, FileMode.Open)))
+    {
+        int fileCount = reader.ReadInt32();
+        var fileMeta = new List<(string name, int size)>();
+        for (int i = 0; i < fileCount; i++)
+        {
+            string name = reader.ReadString();
+            int size = reader.ReadInt32();
+            fileMeta.Add((name, size));
+        }
+
+        int symbolCount = reader.ReadInt32();
+        var frequencies = new Dictionary<byte, int>();
+        for (int i = 0; i < symbolCount; i++)
+        {
+            byte symbol = reader.ReadByte();
+            int freq = reader.ReadInt32();
+            frequencies[symbol] = freq;
+        }
+
+        HuffmanNode root = BuildTree(frequencies);
+        string bitString = BitWriter.ReadBits(reader);
+
+        if (isCancelledFunc != null && isCancelledFunc())
+            return;
+
+        byte[] allData = Decode(root, bitString);
+
+        int offset = 0;
+        foreach (var (name, size) in fileMeta)
+        {
+            if (isCancelledFunc != null && isCancelledFunc())
+                break;
+
+            byte[] fileData = allData.Skip(offset).Take(size).ToArray();
+            string fullPath = Path.Combine(outputFolder, name);
+            File.WriteAllBytes(fullPath, fileData);
+            offset += size;
+        }
+
+        // في حال الإلغاء بعد بدء الكتابة، حذف الملفات الناتجة
+        if (isCancelledFunc != null && isCancelledFunc())
+        {
+            try
             {
-                byte symbol = reader.ReadByte();
-                int freq = reader.ReadInt32();
-                frequencies[symbol] = freq;
+                Directory.Delete(outputFolder, true);
             }
-
-            HuffmanNode root = BuildTree(frequencies);
-            string bitString = BitWriter.ReadBits(reader);
-            byte[] result = Decode(root, bitString, token);
-
-            string actualOutputPath = outputPath ?? Path.ChangeExtension(compressedPath, extension);
-            File.WriteAllBytes(actualOutputPath, result);
+            catch { }
         }
     }
-
-    public void DecompressArchive(string archivePath, string outputFolder = null, CancellationToken token = default)
-    {
-        outputFolder = outputFolder ?? Path.Combine(Path.GetDirectoryName(archivePath), Path.GetFileNameWithoutExtension(archivePath) + "_Extracted");
-        if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
-
-        using (var reader = new BinaryReader(File.Open(archivePath, FileMode.Open)))
-        {
-            int fileCount = reader.ReadInt32();
-            var fileMeta = new List<(string name, int size)>();
-            for (int i = 0; i < fileCount; i++)
-            {
-                string name = reader.ReadString();
-                int size = reader.ReadInt32();
-                fileMeta.Add((name, size));
-            }
-
-            int symbolCount = reader.ReadInt32();
-            var frequencies = new Dictionary<byte, int>();
-            for (int i = 0; i < symbolCount; i++)
-            {
-                byte symbol = reader.ReadByte();
-                int freq = reader.ReadInt32();
-                frequencies[symbol] = freq;
-            }
-
-            HuffmanNode root = BuildTree(frequencies);
-            string bitString = BitWriter.ReadBits(reader);
-            byte[] allData = Decode(root, bitString, token);
-
-            int offset = 0;
-            foreach (var (name, size) in fileMeta)
-            {
-                if (token.IsCancellationRequested) return;
-                byte[] fileData = allData.Skip(offset).Take(size).ToArray();
-                string fullPath = Path.Combine(outputFolder, name);
-                File.WriteAllBytes(fullPath, fileData);
-                offset += size;
-            }
-        }
-    }
-
-    private byte[] Decode(HuffmanNode root, string bits, CancellationToken token)
-    {
-        var result = new List<byte>();
-        var node = root;
-        int count = 0;
-        foreach (char bit in bits)
-        {
-            pauseEvent.Wait();
-            if (token.IsCancellationRequested) return result.ToArray();
-            node = bit == '0' ? node.Left : node.Right;
-            if (node.Symbol != null)
-            {
-                result.Add(node.Symbol.Value);
-                node = root;
-            }
-            count++;
-            if (count % 1000 == 0)
-                System.Windows.Forms.Application.DoEvents();
-        }
-        return result.ToArray();
-    }
+}
 
     public void ExtractSingleFileFromArchive(string archivePath, string fileNameToExtract, string savePath)
     {
-        using (var reader = new BinaryReader(File.Open(archivePath, FileMode.Open)))
+    using (var reader = new BinaryReader(File.Open(archivePath, FileMode.Open)))
+    {
+        int fileCount = reader.ReadInt32();
+        var fileMeta = new List<(string name, int size)>();
+        for (int i = 0; i < fileCount; i++)
         {
-            int fileCount = reader.ReadInt32();
-            var fileMeta = new List<(string name, int size)>();
-            for (int i = 0; i < fileCount; i++)
-            {
-                string name = reader.ReadString();
-                int size = reader.ReadInt32();
-                fileMeta.Add((name, size));
-            }
-
-            int symbolCount = reader.ReadInt32();
-            var frequencies = new Dictionary<byte, int>();
-            for (int i = 0; i < symbolCount; i++)
-            {
-                byte symbol = reader.ReadByte();
-                int freq = reader.ReadInt32();
-                frequencies[symbol] = freq;
-            }
-
-            HuffmanNode root = BuildTree(frequencies);
-            string bitString = BitWriter.ReadBits(reader);
-            byte[] allData = Decode(root, bitString, CancellationToken.None);
-
-            int offset = 0;
-            foreach (var (name, size) in fileMeta)
-            {
-                if (name == fileNameToExtract)
-                {
-                    byte[] fileData = allData.Skip(offset).Take(size).ToArray();
-                    File.WriteAllBytes(savePath, fileData);
-                    break;
-                }
-                offset += size;
-            }
+            string name = reader.ReadString();
+            int size = reader.ReadInt32();
+            fileMeta.Add((name, size));
         }
+
+        int symbolCount = reader.ReadInt32();
+        var frequencies = new Dictionary<byte, int>();
+        for (int i = 0; i < symbolCount; i++)
+        {
+            byte symbol = reader.ReadByte();
+            int freq = reader.ReadInt32();
+            frequencies[symbol] = freq;
+        }
+
+        HuffmanNode root = BuildTree(frequencies);
+        string bitString = BitWriter.ReadBits(reader);
+        byte[] allData = Decode(root, bitString);
+
+        int offset = 0;
+        foreach (var (name, size) in fileMeta)
+        {
+            if (name == fileNameToExtract)
+            {
+                byte[] fileData = allData.Skip(offset).Take(size).ToArray();
+                File.WriteAllBytes(savePath, fileData);
+                break;
+            }
+            offset += size;
+        }
+    }
     }
 
     public List<string> GetFileListFromArchive(string archivePath)
@@ -281,7 +328,28 @@ public class HuffmanCompressor
             GenerateCodes(node.Right, code + "1");
         }
     }
-} 
+
+    private byte[] Decode(HuffmanNode root, string bits)
+    {
+        var result = new List<byte>();
+        var node = root;
+        int count = 0;
+        foreach (char bit in bits)
+        {
+            pauseEvent.Wait();
+            node = bit == '0' ? node.Left : node.Right;
+            if (node.Symbol != null)
+            {
+                result.Add(node.Symbol.Value);
+                node = root;
+            }
+            count++;
+            if (count % 1000 == 0)
+                System.Windows.Forms.Application.DoEvents();
+        }
+        return result.ToArray();
+    }
+}
 
 public class HuffmanNode
 {
