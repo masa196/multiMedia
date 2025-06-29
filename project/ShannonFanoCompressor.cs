@@ -350,4 +350,94 @@ string actualOutputPath = outputPath ?? Path.Combine(baseDir, baseName + "_extra
 
         return result.ToArray();
     }
+    public double CompressFolder(string folderPath, string outputPath)
+    {
+        // نفس فكرة CompressMultipleFiles لكن تضيف دعم المسارات النسبية للملفات داخل المجلد (subfolders)
+        var allFiles = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+
+        var fileMeta = new List<(string relativePath, int size)>();
+        var allBytes = new List<byte>();
+
+        foreach (var file in allFiles)
+        {
+            string relativePath = GetRelativePath(folderPath, file);
+            byte[] content = File.ReadAllBytes(file);
+            fileMeta.Add((relativePath, content.Length));
+            allBytes.AddRange(content);
+        }
+
+        var data = allBytes.ToArray();
+        var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
+
+        codes.Clear();
+        BuildCode(frequencies.OrderByDescending(p => p.Value).ToList(), "");
+
+        try
+        {
+            using (var writer = new BinaryWriter(File.Open(outputPath, FileMode.Create)))
+            {
+                writer.Write(fileMeta.Count);
+                foreach (var (relativePath, size) in fileMeta)
+                {
+                    writer.Write(relativePath);
+                    writer.Write(size);
+                }
+
+                writer.Write(frequencies.Count);
+                foreach (var pair in frequencies)
+                {
+                    writer.Write(pair.Key);
+                    writer.Write(pair.Value);
+                }
+
+                var encodedBuilder = new StringBuilder();
+                int count = 0;
+                foreach (byte b in data)
+                {
+                    pauseEvent.Wait();
+                    if (isCancelledFunc?.Invoke() == true)
+                        throw new OperationCanceledException();
+
+                    encodedBuilder.Append(codes[b]);
+
+                    if (++count % 1000 == 0)
+                        Application.DoEvents();
+                }
+
+                if (isCancelledFunc?.Invoke() == true)
+                    throw new OperationCanceledException();
+
+                BitWriter.WriteBits(writer, encodedBuilder.ToString());
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            if (File.Exists(outputPath))
+                File.Delete(outputPath);
+            return 0;
+        }
+
+        long originalSize = data.Length;
+        long compressedSize = new FileInfo(outputPath).Length;
+        return 100.0 * (1 - (compressedSize / (double)originalSize));
+    }
+
+    // تابع مساعدة: مسار نسبي للملفات داخل المجلد
+    public static string GetRelativePath(string basePath, string fullPath)
+    {
+        Uri baseUri = new Uri(AppendDirectorySeparatorChar(basePath));
+        Uri fullUri = new Uri(fullPath);
+        Uri relativeUri = baseUri.MakeRelativeUri(fullUri);
+        string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+        return relativePath.Replace('/', Path.DirectorySeparatorChar);
+    }
+
+    private static string AppendDirectorySeparatorChar(string path)
+    {
+        if (!path.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            return path + Path.DirectorySeparatorChar;
+        return path;
+    }
+
 }

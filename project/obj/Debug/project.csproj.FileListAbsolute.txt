@@ -157,3 +157,4 @@ C:\Users\Noor\source\repos\project\project\obj\Debug\project.csproj.CoreCompileI
 C:\Users\Noor\source\repos\project\project\obj\Debug\project.csproj.CopyComplete
 C:\Users\Noor\source\repos\project\project\obj\Debug\project.exe
 C:\Users\Noor\source\repos\project\project\obj\Debug\project.pdb
+C:\Users\USER\Desktop\multiMedia\project\obj\Debug\project.exe.config

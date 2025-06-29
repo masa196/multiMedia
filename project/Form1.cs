@@ -12,17 +12,15 @@ namespace project
     public partial class Form1 : Form
     {
         private string[] selectedFiles = new string[0];
+        private string selectedFolderPath = null;  // متغير جديد لمسار المجلد المختار
         private bool isPaused = false;
         private ManualResetEventSlim pauseEvent = new ManualResetEventSlim(true);
         private bool isCancelled = false;
-
 
         public Form1()
         {
             InitializeComponent();
             lblStatus.Text = "";
-
-
         }
 
         private ICompressor CreateSelectedCompressor()
@@ -34,7 +32,6 @@ namespace project
                 return new ShannonFanoCompressor(pauseEvent, () => isCancelled);
         }
 
-
         private void btnBrowse_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -44,12 +41,30 @@ namespace project
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
+                selectedFolderPath = null; // مسح اختيار المجلد لأننا نختار ملفات
                 List<string> fileList = selectedFiles.ToList();
                 fileList.AddRange(ofd.FileNames);
                 selectedFiles = fileList.Distinct().ToArray();
 
                 listBoxFiles.Items.Clear();
                 listBoxFiles.Items.AddRange(selectedFiles);
+            }
+        }
+
+        private void btnBrowseFolder_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new FolderBrowserDialog())
+            {
+                dlg.Description = "اختر مجلد للضغط";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    selectedFolderPath = dlg.SelectedPath;
+                    MessageBox.Show("تم اختيار المجلد:\n" + selectedFolderPath);
+
+                    // امسح قائمة الملفات لأننا الآن نضغط مجلد وليس ملفات منفصلة
+                    selectedFiles = new string[0];
+                    listBoxFiles.Items.Clear();
+                }
             }
         }
 
@@ -76,72 +91,112 @@ namespace project
 
         private async void btnCompress_Click(object sender, EventArgs e)
         {
-            if (selectedFiles == null || selectedFiles.Length == 0)
+            // ضغط مجلد كامل لو تم اختيار مجلد
+            if (!string.IsNullOrEmpty(selectedFolderPath) && Directory.Exists(selectedFolderPath))
+            {
+                btnCompress.Enabled = false;
+                btnDecompress.Enabled = false;
+                btnExtractOne.Enabled = false;
+                btnStop.Enabled = true;
+                btnCancel.Enabled = true;
+                btnStop.Text = "إيقاف";
+                lblResultMessage.Text = "🔄 جاري الضغط....";
+                pauseEvent.Set();
+                isPaused = false;
+                isCancelled = false;
+
+                ICompressor compressor = CreateSelectedCompressor();
+
+                SaveFileDialog sfd = new SaveFileDialog();
+                string extension = comboAlgorithm.SelectedItem.ToString() == "Huffman" ? ".huffarc" : ".sfarc";
+                sfd.Filter = $"{comboAlgorithm.SelectedItem} Archive|*{extension}";
+                sfd.FileName = "Archive" + extension;
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    string archivePath = sfd.FileName;
+
+                    double ratio = await Task.Run(() => compressor.CompressFolder(selectedFolderPath, archivePath));
+                    if (!isCancelled)
+                        MessageBox.Show($"✅ تم ضغط المجلد.\nنسبة الضغط: {ratio:F2}%");
+                    else if (File.Exists(archivePath))
+                        File.Delete(archivePath);
+                }
+
+                lblResultMessage.Text = isCancelled ? "❌ تم إلغاء العملية." : "✅ تم الضغط.";
+                btnCompress.Enabled = true;
+                btnDecompress.Enabled = true;
+                btnExtractOne.Enabled = true;
+                btnStop.Enabled = false;
+                btnCancel.Enabled = false;
+            }
+            else if (selectedFiles == null || selectedFiles.Length == 0)
             {
                 MessageBox.Show("يرجى اختيار ملف واحد أو أكثر أولاً.");
                 return;
             }
-
-            btnCompress.Enabled = false;
-            btnDecompress.Enabled = false;
-            btnExtractOne.Enabled = false;
-            btnStop.Enabled = true;
-            btnCancel.Enabled = true;
-            btnStop.Text = "إيقاف";
-            lblResultMessage.Text = "🔄 جاري الضغط....";
-            pauseEvent.Set();
-            isPaused = false;
-            isCancelled = false;
-
-            ICompressor compressor = CreateSelectedCompressor();
-            string mode = comboMode.SelectedItem?.ToString() ?? "ضغط كل ملف بشكل منفصل";
-
-            if (mode == "ضغط كل ملف بشكل منفصل")
+            else
             {
-                StringBuilder report = new StringBuilder();
-                foreach (string input in selectedFiles)
+                // نفس كود الضغط لملفات منفصلة كما هو سابقا
+                btnCompress.Enabled = false;
+                btnDecompress.Enabled = false;
+                btnExtractOne.Enabled = false;
+                btnStop.Enabled = true;
+                btnCancel.Enabled = true;
+                btnStop.Text = "إيقاف";
+                lblResultMessage.Text = "🔄 جاري الضغط....";
+                pauseEvent.Set();
+                isPaused = false;
+                isCancelled = false;
+
+                ICompressor compressor = CreateSelectedCompressor();
+                string mode = comboMode.SelectedItem?.ToString() ?? "ضغط كل ملف بشكل منفصل";
+
+                if (mode == "ضغط كل ملف بشكل منفصل")
                 {
-                    if (isCancelled) break;
+                    StringBuilder report = new StringBuilder();
+                    foreach (string input in selectedFiles)
+                    {
+                        if (isCancelled) break;
 
-                    string extension = comboAlgorithm.SelectedItem.ToString() == "Huffman" ? ".huff" : ".sf";
-                    string output = input + extension;
+                        string extension = comboAlgorithm.SelectedItem.ToString() == "Huffman" ? ".huff" : ".sf";
+                        string output = input + extension;
 
+                        double ratio = await Task.Run(() => compressor.CompressSingleFile(input, output));
+                        if (!isCancelled)
+                            report.AppendLine($"📄 {Path.GetFileName(input)}: نسبة الضغط = {ratio:F2}%");
+                    }
 
-                    double ratio = await Task.Run(() => compressor.CompressSingleFile(input, output));
                     if (!isCancelled)
-                        report.AppendLine($"📄 {Path.GetFileName(input)}: نسبة الضغط = {ratio:F2}%");
+                        MessageBox.Show("✅ تم ضغط الملفات كلٌ على حدة:\n\n" + report.ToString());
+                }
+                else if (mode == "ضغط الملفات كأرشيف واحد")
+                {
+                    SaveFileDialog sfd = new SaveFileDialog();
+                    sfd.Filter = "Huffman Archive|*.huffarc";
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        string extension = comboAlgorithm.SelectedItem.ToString() == "Huffman" ? ".huffarc" : ".sfarc";
+                        string archivePath = Path.Combine(
+                            Path.GetDirectoryName(sfd.FileName),
+                            Path.GetFileNameWithoutExtension(sfd.FileName) + extension
+                        );
+
+                        double ratio = await Task.Run(() => compressor.CompressMultipleFiles(selectedFiles, archivePath));
+                        if (!isCancelled)
+                            MessageBox.Show($"✅ تم ضغط الملفات في أرشيف.\nنسبة الضغط: {ratio:F2}%");
+                        else if (File.Exists(archivePath))
+                            File.Delete(archivePath);
+                    }
                 }
 
-                if (!isCancelled)
-                    MessageBox.Show("✅ تم ضغط الملفات كلٌ على حدة:\n\n" + report.ToString());
+                lblResultMessage.Text = isCancelled ? "❌ تم إلغاء العملية." : "✅ تم الضغط.";
+                btnCompress.Enabled = true;
+                btnDecompress.Enabled = true;
+                btnExtractOne.Enabled = true;
+                btnStop.Enabled = false;
+                btnCancel.Enabled = false;
             }
-            else if (mode == "ضغط الملفات كأرشيف واحد")
-            {
-                SaveFileDialog sfd = new SaveFileDialog();
-                sfd.Filter = "Huffman Archive|*.huffarc";
-                if (sfd.ShowDialog() == DialogResult.OK)
-                {
-                    string extension = comboAlgorithm.SelectedItem.ToString() == "Huffman" ? ".huffarc" : ".sfarc";
-                    string archivePath = Path.Combine(
-                        Path.GetDirectoryName(sfd.FileName),
-                        Path.GetFileNameWithoutExtension(sfd.FileName) + extension
-                    );
-
-
-                    double ratio = await Task.Run(() => compressor.CompressMultipleFiles(selectedFiles, archivePath));
-                    if (!isCancelled)
-                        MessageBox.Show($"✅ تم ضغط الملفات في أرشيف.\nنسبة الضغط: {ratio:F2}%");
-                    else if (File.Exists(archivePath))
-                        File.Delete(archivePath);
-                }
-            }
-
-            lblResultMessage.Text = isCancelled ? "❌ تم إلغاء العملية." : "✅ تم الضغط.";
-            btnCompress.Enabled = true;
-            btnDecompress.Enabled = true;
-            btnExtractOne.Enabled = true;
-            btnStop.Enabled = false;
-            btnCancel.Enabled = false;
         }
 
         private async void btnDecompress_Click(object sender, EventArgs e)
@@ -192,6 +247,7 @@ namespace project
             selectedFiles = new string[0];
             listBoxFiles.Items.Clear();
         }
+
         private void btnExtractOne_Click(object sender, EventArgs e)
         {
             if (selectedFiles.Length == 0 || !(selectedFiles[0].EndsWith(".huffarc") || selectedFiles[0].EndsWith(".sfarc")))
@@ -199,7 +255,6 @@ namespace project
                 MessageBox.Show("يرجى اختيار أرشيف .huffarc أو .sfarc أولاً.");
                 return;
             }
-
 
             string archivePath = selectedFiles[0];
             ICompressor compressor = CreateSelectedCompressor();

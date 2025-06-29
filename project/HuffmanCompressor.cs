@@ -178,67 +178,7 @@ public class HuffmanCompressor : ICompressor
 }
 
     // ✅ فك ملف الأرشيف المتعدد
-    public void DecompressArchive(string archivePath, string outputFolder = null)
-{
-    outputFolder = outputFolder ?? Path.Combine(
-        Path.GetDirectoryName(archivePath),
-        Path.GetFileNameWithoutExtension(archivePath) + "_Extracted"
-    );
 
-    if (!Directory.Exists(outputFolder))
-        Directory.CreateDirectory(outputFolder);
-
-    using (var reader = new BinaryReader(File.Open(archivePath, FileMode.Open)))
-    {
-        int fileCount = reader.ReadInt32();
-        var fileMeta = new List<(string name, int size)>();
-        for (int i = 0; i < fileCount; i++)
-        {
-            string name = reader.ReadString();
-            int size = reader.ReadInt32();
-            fileMeta.Add((name, size));
-        }
-
-        int symbolCount = reader.ReadInt32();
-        var frequencies = new Dictionary<byte, int>();
-        for (int i = 0; i < symbolCount; i++)
-        {
-            byte symbol = reader.ReadByte();
-            int freq = reader.ReadInt32();
-            frequencies[symbol] = freq;
-        }
-
-        HuffmanNode root = BuildTree(frequencies);
-        string bitString = BitWriter.ReadBits(reader);
-
-        if (isCancelledFunc != null && isCancelledFunc())
-            return;
-
-        byte[] allData = Decode(root, bitString);
-
-        int offset = 0;
-        foreach (var (name, size) in fileMeta)
-        {
-            if (isCancelledFunc != null && isCancelledFunc())
-                break;
-
-            byte[] fileData = allData.Skip(offset).Take(size).ToArray();
-            string fullPath = Path.Combine(outputFolder, name);
-            File.WriteAllBytes(fullPath, fileData);
-            offset += size;
-        }
-
-        // في حال الإلغاء بعد بدء الكتابة، حذف الملفات الناتجة
-        if (isCancelledFunc != null && isCancelledFunc())
-        {
-            try
-            {
-                Directory.Delete(outputFolder, true);
-            }
-            catch { }
-        }
-    }
-}
 
     public void ExtractSingleFileFromArchive(string archivePath, string fileNameToExtract, string savePath)
     {
@@ -349,6 +289,173 @@ public class HuffmanCompressor : ICompressor
         }
         return result.ToArray();
     }
+    public double CompressFolder(string folderPath, string outputPath)
+    {
+        // 1. الحصول على كل الملفات مع المسار النسبي داخل المجلد
+        var allFiles = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+
+        // قائمة لتخزين معلومات الملفات (الاسم النسبي والحجم)
+        var fileMeta = new List<(string relativePath, int size)>();
+
+        // قائمة لتجميع كل البايتات للضغط
+        var allBytes = new List<byte>();
+
+        foreach (var file in allFiles)
+        {
+            // المسار النسبي داخل المجلد
+            string relativePath = GetRelativePath(folderPath, file);
+
+            byte[] content = File.ReadAllBytes(file);
+            fileMeta.Add((relativePath, content.Length));
+            allBytes.AddRange(content);
+        }
+
+        var data = allBytes.ToArray();
+        var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
+
+        HuffmanNode root = BuildTree(frequencies);
+        GenerateCodes(root, "");
+
+        try
+        {
+            using (var stream = File.Open(outputPath, FileMode.Create))
+            using (var writer = new BinaryWriter(stream))
+            {
+                // نكتب عدد الملفات
+                writer.Write(fileMeta.Count);
+
+                // نكتب اسم كل ملف مع حجمه
+                foreach (var (relativePath, size) in fileMeta)
+                {
+                    writer.Write(relativePath);
+                    writer.Write(size);
+                }
+
+                // نكتب جدول الترددات
+                writer.Write(frequencies.Count);
+                foreach (var pair in frequencies)
+                {
+                    writer.Write(pair.Key);
+                    writer.Write(pair.Value);
+                }
+
+                // نضغط البيانات
+                var encodedBuilder = new StringBuilder();
+                int count = 0;
+                foreach (byte b in data)
+                {
+                    pauseEvent.Wait();
+                    if (isCancelledFunc != null && isCancelledFunc())
+                        throw new OperationCanceledException();
+
+                    encodedBuilder.Append(codes[b]);
+                    count++;
+                    if (count % 1000 == 0)
+                        System.Windows.Forms.Application.DoEvents();
+                }
+
+                if (isCancelledFunc != null && isCancelledFunc())
+                    throw new OperationCanceledException();
+
+                BitWriter.WriteBits(writer, encodedBuilder.ToString());
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            if (File.Exists(outputPath))
+                File.Delete(outputPath);
+            return 0;
+        }
+
+        long originalSize = data.Length;
+        long compressedSize = new FileInfo(outputPath).Length;
+        return 100.0 * (1 - (compressedSize / (double)originalSize));
+    }
+    public void DecompressArchive(string archivePath, string outputFolder = null)
+    {
+        outputFolder = outputFolder ?? Path.Combine(
+            Path.GetDirectoryName(archivePath),
+            Path.GetFileNameWithoutExtension(archivePath) + "_Extracted"
+        );
+
+        if (!Directory.Exists(outputFolder))
+            Directory.CreateDirectory(outputFolder);
+
+        using (var reader = new BinaryReader(File.Open(archivePath, FileMode.Open)))
+        {
+            int fileCount = reader.ReadInt32();
+            var fileMeta = new List<(string relativePath, int size)>();
+            for (int i = 0; i < fileCount; i++)
+            {
+                string relativePath = reader.ReadString();
+                int size = reader.ReadInt32();
+                fileMeta.Add((relativePath, size));
+            }
+
+            int symbolCount = reader.ReadInt32();
+            var frequencies = new Dictionary<byte, int>();
+            for (int i = 0; i < symbolCount; i++)
+            {
+                byte symbol = reader.ReadByte();
+                int freq = reader.ReadInt32();
+                frequencies[symbol] = freq;
+            }
+
+            HuffmanNode root = BuildTree(frequencies);
+            string bitString = BitWriter.ReadBits(reader);
+
+            if (isCancelledFunc != null && isCancelledFunc())
+                return;
+
+            byte[] allData = Decode(root, bitString);
+
+            int offset = 0;
+            foreach (var (relativePath, size) in fileMeta)
+            {
+                if (isCancelledFunc != null && isCancelledFunc())
+                    break;
+
+                byte[] fileData = allData.Skip(offset).Take(size).ToArray();
+                string fullPath = Path.Combine(outputFolder, relativePath);
+
+                // تأكد من وجود المجلد الذي يحتوي الملف
+                string dir = Path.GetDirectoryName(fullPath);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                File.WriteAllBytes(fullPath, fileData);
+                offset += size;
+            }
+
+            // في حال الإلغاء بعد بدء الكتابة، حذف الملفات الناتجة
+            if (isCancelledFunc != null && isCancelledFunc())
+            {
+                try
+                {
+                    Directory.Delete(outputFolder, true);
+                }
+                catch { }
+            }
+        }
+    }
+    public static string GetRelativePath(string basePath, string fullPath)
+    {
+        Uri baseUri = new Uri(AppendDirectorySeparatorChar(basePath));
+        Uri fullUri = new Uri(fullPath);
+        Uri relativeUri = baseUri.MakeRelativeUri(fullUri);
+        string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+        return relativePath.Replace('/', Path.DirectorySeparatorChar);
+    }
+
+    private static string AppendDirectorySeparatorChar(string path)
+    {
+        if (!path.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            return path + Path.DirectorySeparatorChar;
+        return path;
+    }
+
+
 }
 
 public class HuffmanNode

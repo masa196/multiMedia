@@ -15,7 +15,8 @@
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblResultMessage;
         private System.Windows.Forms.ComboBox comboMode;
-        private System.Windows.Forms.ComboBox comboAlgorithm; 
+        private System.Windows.Forms.ComboBox comboAlgorithm;
+        private System.Windows.Forms.Button btnBrowseFolder;
 
         protected override void Dispose(bool disposing)
         {
@@ -177,6 +178,17 @@
             this.lblResultMessage.Size = new System.Drawing.Size(0, 15);
             this.lblResultMessage.TabIndex = 9;
 
+            ///
+
+            this.btnBrowseFolder = new System.Windows.Forms.Button();
+            this.btnBrowseFolder.Location = new System.Drawing.Point(520, 70);
+            this.btnBrowseFolder.Name = "btnBrowseFolder";
+            this.btnBrowseFolder.Size = new System.Drawing.Size(100, 23);
+            this.btnBrowseFolder.TabIndex = 12;
+            this.btnBrowseFolder.Text = "اختيار مجلد";
+            this.btnBrowseFolder.UseVisualStyleBackColor = true;
+            this.btnBrowseFolder.Click += new System.EventHandler(this.btnBrowseFolder_Click);
+            this.Controls.Add(this.btnBrowseFolder);
             // 
             // Form1
             // 

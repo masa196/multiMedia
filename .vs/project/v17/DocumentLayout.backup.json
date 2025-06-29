@@ -1,42 +1,42 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\ASUS\\source\\repos\\project\\",
+  "WorkspaceRootPath": "C:\\Users\\USER\\Desktop\\multiMedia\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\ASUS\\source\\repos\\project\\project\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\ASUS\\source\\repos\\project\\project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|c:\\users\\asus\\source\\repos\\project\\project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|c:\\users\\asus\\source\\repos\\project\\project\\shannonfanocompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\shannonfanocompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\ASUS\\source\\repos\\project\\project\\bitwriter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\bitwriter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|c:\\users\\asus\\source\\repos\\project\\project\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\ASUS\\source\\repos\\project\\project\\simplepriorityqueue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\bitwriter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\bitwriter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\simplepriorityqueue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\simplepriorityqueue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\ASUS\\source\\repos\\project\\project\\huffmancompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\huffmancompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\huffmancompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|c:\\users\\asus\\source\\repos\\project\\project\\icompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\icompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\icompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|c:\\users\\user\\desktop\\multimedia\\project\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\shannonfanocompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\shannonfanocompressor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|C:\\Users\\USER\\Desktop\\multiMedia\\project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{289F0325-D16B-43F1-9088-F6D4021BF77D}|project\\project.csproj|solutionrelative:project\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -50,10 +50,6 @@
           "Children": [
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
-            {
-              "$type": "Bookmark",
               "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
             },
             {
@@ -65,124 +61,128 @@
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "BitWriter.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\BitWriter.cs",
-              "RelativeDocumentMoniker": "project\\BitWriter.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\BitWriter.cs",
-              "RelativeToolTip": "project\\BitWriter.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-15T10:43:39.174Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ShannonFanoCompressor.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\ShannonFanoCompressor.cs",
-              "RelativeDocumentMoniker": "project\\ShannonFanoCompressor.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\ShannonFanoCompressor.cs*",
-              "RelativeToolTip": "project\\ShannonFanoCompressor.cs*",
-              "ViewState": "AgIAAB4BAAAAAAAAAADwvzIBAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-28T14:12:32.75Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Program.cs",
-              "RelativeDocumentMoniker": "project\\Program.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Program.cs",
-              "RelativeToolTip": "project\\Program.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAQwA8AAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-15T10:41:21.643Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Form1.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Form1.cs",
-              "RelativeDocumentMoniker": "project\\Form1.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Form1.cs [Design]*",
-              "RelativeToolTip": "project\\Form1.cs [Design]*",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-28T13:42:34.883Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Form1.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Form1.cs",
-              "RelativeDocumentMoniker": "project\\Form1.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Form1.cs*",
-              "RelativeToolTip": "project\\Form1.cs*",
-              "ViewState": "AgIAAPkAAAAAAAAAAAArwMIAAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-15T10:53:03.947Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Form1.Designer.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Form1.Designer.cs",
-              "RelativeDocumentMoniker": "project\\Form1.Designer.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\Form1.Designer.cs",
-              "RelativeToolTip": "project\\Form1.Designer.cs",
-              "ViewState": "AgIAAFIAAAAAAAAAAAAAAMkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-15T10:56:42.889Z",
-              "EditorCaption": ""
-            },
-            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "SimplePriorityQueue.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\SimplePriorityQueue.cs",
-              "RelativeDocumentMoniker": "project\\SimplePriorityQueue.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\SimplePriorityQueue.cs",
-              "RelativeToolTip": "project\\SimplePriorityQueue.cs",
-              "ViewState": "AgIAAD8AAAAAAAAAAAAswFMAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-15T10:51:27.289Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 4,
               "Title": "ICompressor.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\ICompressor.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\ICompressor.cs",
               "RelativeDocumentMoniker": "project\\ICompressor.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\ICompressor.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\ICompressor.cs",
               "RelativeToolTip": "project\\ICompressor.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-28T14:08:23.717Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 5,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Form1.cs",
+              "RelativeDocumentMoniker": "project\\Form1.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Form1.cs",
+              "RelativeToolTip": "project\\Form1.cs",
+              "ViewState": "AgIAAB8BAAAAAAAAAAAAACYBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T10:53:03.947Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "HuffmanCompressor.cs",
-              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\project\\project\\HuffmanCompressor.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\HuffmanCompressor.cs",
               "RelativeDocumentMoniker": "project\\HuffmanCompressor.cs",
-              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\project\\project\\HuffmanCompressor.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\HuffmanCompressor.cs",
               "RelativeToolTip": "project\\HuffmanCompressor.cs",
-              "ViewState": "AgIAAFMBAAAAAAAAAAAswGcBAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAL4BAAAAAAAAAAAAANIBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-15T10:42:20.176Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "SimplePriorityQueue.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\SimplePriorityQueue.cs",
+              "RelativeDocumentMoniker": "project\\SimplePriorityQueue.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\SimplePriorityQueue.cs",
+              "RelativeToolTip": "project\\SimplePriorityQueue.cs",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAQwFMAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T10:51:27.289Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BitWriter.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\BitWriter.cs",
+              "RelativeDocumentMoniker": "project\\BitWriter.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\BitWriter.cs",
+              "RelativeToolTip": "project\\BitWriter.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAgwDcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T10:43:39.174Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Program.cs",
+              "RelativeDocumentMoniker": "project\\Program.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Program.cs",
+              "RelativeToolTip": "project\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T10:41:21.643Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "project\\Form1.Designer.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Form1.Designer.cs",
+              "RelativeToolTip": "project\\Form1.Designer.cs",
+              "ViewState": "AgIAAMMAAAAAAAAAAAAgwMkAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-29T16:40:42.928Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ShannonFanoCompressor.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\ShannonFanoCompressor.cs",
+              "RelativeDocumentMoniker": "project\\ShannonFanoCompressor.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\ShannonFanoCompressor.cs",
+              "RelativeToolTip": "project\\ShannonFanoCompressor.cs",
+              "ViewState": "AgIAAKcBAAAAAAAAAADwv7YBAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-28T14:12:32.75Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Form1.cs",
+              "RelativeDocumentMoniker": "project\\Form1.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\multiMedia\\project\\Form1.cs [Design]",
+              "RelativeToolTip": "project\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-28T13:42:34.883Z",
+              "EditorCaption": " [Design]"
             }
           ]
         },

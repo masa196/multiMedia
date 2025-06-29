@@ -8,4 +8,6 @@ public interface ICompressor
     void DecompressArchive(string archivePath, string outputFolder = null);
     void ExtractSingleFileFromArchive(string archivePath, string fileNameToExtract, string savePath);
     List<string> GetFileListFromArchive(string archivePath);
+    double CompressFolder(string folderPath, string outputPath);
+
 }
