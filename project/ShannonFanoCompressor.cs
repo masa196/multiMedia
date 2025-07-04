@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,76 +17,103 @@ public class ShannonFanoCompressor : ICompressor
         this.pauseEvent = pauseEvent;
         this.isCancelledFunc = isCancelledFunc;
     }
-
     public double CompressSingleFile(string inputPath, string outputPath)
     {
-        byte[] data = File.ReadAllBytes(inputPath);
-        var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
+        // إذا لم يتم تمرير كلمة سر، نمرر نص فارغ تلقائيًا
+        return CompressSingleFile(inputPath, outputPath, "");
+    }
 
-        codes.Clear();
-        BuildCode(frequencies.OrderByDescending(p => p.Value).ToList(), "");
+  public double CompressSingleFile(string inputPath, string outputPath, string password)
+{
+    byte[] data = File.ReadAllBytes(inputPath);
+    var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
 
-        try
+    codes.Clear();
+    BuildCode(frequencies.OrderByDescending(p => p.Value).ToList(), "");
+
+    try
+    {
+        using (var stream = File.Open(outputPath, FileMode.Create))
+        using (var writer = new BinaryWriter(stream))
         {
-            using (var stream = File.Open(outputPath, FileMode.Create))
-            using (var writer = new BinaryWriter(stream))
+            // اكتب كلمة السر أولاً
+            writer.Write(password ?? "");
+
+            // ثم باقي البيانات
+            writer.Write(Path.GetFileName(inputPath));
+
+            writer.Write(frequencies.Count);
+            foreach (var pair in frequencies)
             {
-                // ✅ احفظ الاسم الأصلي للملف
-                writer.Write(Path.GetFileName(inputPath));
+                writer.Write(pair.Key);
+                writer.Write(pair.Value);
+            }
 
-                // ✅ حفظ التكرارات
-                writer.Write(frequencies.Count);
-                foreach (var pair in frequencies)
-                {
-                    writer.Write(pair.Key);
-                    writer.Write(pair.Value);
-                }
+            writer.Write(codes.Count);
+            foreach (var pair in codes)
+            {
+                writer.Write(pair.Key);
+                writer.Write(pair.Value);
+            }
 
-                // ✅ حفظ الشيفرات الفعلية
-                writer.Write(codes.Count);
-                foreach (var pair in codes)
-                {
-                    writer.Write(pair.Key);
-                    writer.Write(pair.Value);
-                }
-
-                // ✅ كتابة البتات
-                var encodedBuilder = new StringBuilder();
-                int count = 0;
-                foreach (byte b in data)
-                {
-                    pauseEvent.Wait();
-                    if (isCancelledFunc?.Invoke() == true)
-                        throw new OperationCanceledException();
-
-                    encodedBuilder.Append(codes[b]);
-
-                    if (++count % 1000 == 0)
-                        Application.DoEvents();
-                }
-
+            var encodedBuilder = new StringBuilder();
+            int count = 0;
+            foreach (byte b in data)
+            {
+                pauseEvent.Wait();
                 if (isCancelledFunc?.Invoke() == true)
                     throw new OperationCanceledException();
 
-                BitWriter.WriteBits(writer, encodedBuilder.ToString());
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            if (File.Exists(outputPath))
-                File.Delete(outputPath);
-            return 0;
-        }
+                encodedBuilder.Append(codes[b]);
 
-        long originalSize = data.Length;
-        long compressedSize = new FileInfo(outputPath).Length;
-        return 100.0 * (1 - (compressedSize / (double)originalSize));
+                if (++count % 1000 == 0)
+                    Application.DoEvents();
+            }
+
+            if (isCancelledFunc?.Invoke() == true)
+                throw new OperationCanceledException();
+
+            BitWriter.WriteBits(writer, encodedBuilder.ToString());
+        }
+    }
+    catch (OperationCanceledException)
+    {
+        if (File.Exists(outputPath))
+            File.Delete(outputPath);
+        return 0;
     }
 
-    public void DecompressSingleFile(string compressedPath, string outputPath = null)
+    long originalSize = data.Length;
+    long compressedSize = new FileInfo(outputPath).Length;
+    return 100.0 * (1 - (compressedSize / (double)originalSize));
+}
+
+
+
+ public bool DecompressSingleFile(string compressedPath, string outputPath = null)
+{
+    string password = PasswordDialog.ShowDialog("الرجاء إدخال كلمة السر لفك الضغط:");
+
+    if (password == null)
+    {
+        MessageBox.Show("تم إلغاء فك الضغط بسبب عدم إدخال كلمة السر.");
+        return false;
+    }
+
+    try
     {
         using (var reader = new BinaryReader(File.Open(compressedPath, FileMode.Open)))
         {
+            // اقرأ كلمة السر المخزنة
+            string storedPassword = reader.ReadString();
+
+
+            if (storedPassword != password)
+            {
+                MessageBox.Show("❌ كلمة السر غير صحيحة.");
+                return false;
+            }
+
             string originalName = reader.ReadString();
 
             int symbolCount = reader.ReadInt32();
@@ -98,7 +125,6 @@ public class ShannonFanoCompressor : ICompressor
                 frequencies[symbol] = freq;
             }
 
-            // ✅ استعادة الشيفرات بدقة
             int codeCount = reader.ReadInt32();
             codes.Clear();
             for (int i = 0; i < codeCount; i++)
@@ -110,20 +136,31 @@ public class ShannonFanoCompressor : ICompressor
 
             string bitString = BitWriter.ReadBits(reader);
             if (isCancelledFunc?.Invoke() == true)
-                return;
+                return false;
 
             byte[] result = Decode(bitString);
             if (isCancelledFunc?.Invoke() == true)
-                return;
+                return false;
 
-           string baseDir = Path.GetDirectoryName(compressedPath);
-string baseName = Path.GetFileNameWithoutExtension(originalName);
-string actualOutputPath = outputPath ?? Path.Combine(baseDir, baseName + "_extracted" + Path.GetExtension(originalName));
+            string baseDir = Path.GetDirectoryName(compressedPath);
+            string baseName = Path.GetFileNameWithoutExtension(originalName);
+            string actualOutputPath = outputPath ?? Path.Combine(baseDir, baseName + "_extracted" + Path.GetExtension(originalName));
 
             File.WriteAllBytes(actualOutputPath, result);
             MessageBox.Show($"✅ تم فك الضغط:\n{actualOutputPath}", "نجاح");
+
+            return true;
         }
     }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"❌ حدث خطأ أثناء فك الضغط:\n{ex.Message}", "خطأ");
+        return false;
+    }
+}
+
+
+
 
     // 👇 بإمكانك ترك Archive methods كما هي إذا أردت نفس التحسينات هناك أيضاً
     public double CompressMultipleFiles(string[] inputFiles, string outputPath)

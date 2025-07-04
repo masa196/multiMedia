@@ -1,4 +1,13 @@
-﻿namespace project
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;  // <<< هذي ضرورية للتشفير
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+
+namespace project
 {
     partial class Form1
     {
@@ -213,5 +222,51 @@
         }
 
         #endregion
+    }
+}
+public static class PasswordDialog
+{
+    public static string ShowDialog(string text, string caption = "كلمة المرور")
+    {
+        string password = null;
+
+        Form prompt = new Form()
+        {
+            Width = 350,
+            Height = 150,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            Text = caption,
+            StartPosition = FormStartPosition.CenterScreen,
+            MaximizeBox = false,
+            MinimizeBox = false
+        };
+
+        Label textLabel = new Label() { Left = 20, Top = 20, Width = 280, Text = text };
+        TextBox textBox = new TextBox() { Left = 20, Top = 50, Width = 280 };
+        textBox.UseSystemPasswordChar = true;
+
+        Button confirmation = new Button() { Text = "موافق", Left = 140, Width = 80, Top = 80, DialogResult = DialogResult.OK };
+        confirmation.Click += (sender, e) =>
+        {
+            if (string.IsNullOrWhiteSpace(textBox.Text))
+            {
+                MessageBox.Show("الرجاء إدخال كلمة المرور.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                password = textBox.Text;
+                prompt.Close();
+            }
+        };
+
+        prompt.Controls.Add(textLabel);
+        prompt.Controls.Add(textBox);
+        prompt.Controls.Add(confirmation);
+
+        prompt.AcceptButton = confirmation;
+
+        prompt.ShowDialog();
+
+        return password;
     }
 }

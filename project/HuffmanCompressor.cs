@@ -1,9 +1,12 @@
-﻿using System;
+﻿using System;  
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;  // <<< هذي ضرورية للتشفير
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;  // <<< ضروري ل MessageBox وأدوات Windows Forms
+
 
 public class HuffmanCompressor : ICompressor
 {
@@ -17,8 +20,13 @@ public class HuffmanCompressor : ICompressor
         this.isCancelledFunc = isCancelledFunc;
     }
 
-    // ✅ ضغط ملف واحد فقط (القديم)
     public double CompressSingleFile(string inputPath, string outputPath)
+    {
+            // كلمة السر فارغة، هذا يعني عدم التشفير
+            return CompressSingleFile(inputPath, outputPath, "");
+    }
+
+    public double CompressSingleFile(string inputPath, string outputPath, string password)
 {
     byte[] data = File.ReadAllBytes(inputPath);
     var frequencies = data.GroupBy(b => b).ToDictionary(g => g.Key, g => g.Count());
@@ -31,6 +39,9 @@ public class HuffmanCompressor : ICompressor
         using (var stream = File.Open(outputPath, FileMode.Create))
         using (var writer = new BinaryWriter(stream))
         {
+            // كتابة كلمة السر أولاً
+            writer.Write(password ?? "");
+
             string extension = Path.GetExtension(inputPath);
             writer.Write(extension);
             writer.Write(frequencies.Count);
@@ -47,7 +58,7 @@ public class HuffmanCompressor : ICompressor
             {
                 pauseEvent.Wait();
                 if (isCancelledFunc != null && isCancelledFunc())
-                    throw new OperationCanceledException();  // ✅ نرمي استثناء لإلغاء
+                    throw new OperationCanceledException();
 
                 encodedBuilder.Append(codes[b]);
                 count++;
@@ -55,7 +66,6 @@ public class HuffmanCompressor : ICompressor
                     System.Windows.Forms.Application.DoEvents();
             }
 
-            // ✅ تحقق من الإلغاء قبل الكتابة النهائية
             if (isCancelledFunc != null && isCancelledFunc())
                 throw new OperationCanceledException();
 
@@ -65,7 +75,7 @@ public class HuffmanCompressor : ICompressor
     catch (OperationCanceledException)
     {
         if (File.Exists(outputPath))
-            File.Delete(outputPath); // ✅ حذف الملف الناتج
+            File.Delete(outputPath);
         return 0;
     }
 
@@ -74,8 +84,6 @@ public class HuffmanCompressor : ICompressor
     return 100.0 * (1 - (compressedSize / (double)originalSize));
 }
 
-
-    // ✅ ضغط عدة ملفات في ملف واحد
     public double CompressMultipleFiles(string[] inputFiles, string outputPath)
 {
     var allBytes = new List<byte>();
@@ -145,11 +153,27 @@ public class HuffmanCompressor : ICompressor
     return 100.0 * (1 - (compressedSize / (double)originalSize));
 }
 
-    // ✅ فك ملف واحد (القديم)
-    public void DecompressSingleFile(string compressedPath, string outputPath = null)
+   public bool DecompressSingleFile(string compressedPath, string outputPath = null)
 {
+    string password = PasswordDialog.ShowDialog("الرجاء إدخال كلمة السر لفك الضغط:");
+
+    if (password == null)
+    {
+        MessageBox.Show("تم إلغاء فك الضغط بسبب عدم إدخال كلمة السر.");
+        return false;
+    }
+
     using (var reader = new BinaryReader(File.Open(compressedPath, FileMode.Open)))
     {
+        // نقرأ كلمة السر المخزنة في الملف أولاً
+        string storedPassword = reader.ReadString();
+
+        if (storedPassword != password)
+        {
+            MessageBox.Show("❌ كلمة السر غير صحيحة.", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return false;
+        }
+
         string extension = reader.ReadString();
 
         int symbolCount = reader.ReadInt32();
@@ -165,21 +189,21 @@ public class HuffmanCompressor : ICompressor
         string bitString = BitWriter.ReadBits(reader);
 
         if (isCancelledFunc != null && isCancelledFunc())
-            return;
+            return false;
 
         byte[] result = Decode(root, bitString);
 
         if (isCancelledFunc != null && isCancelledFunc())
-            return;
+            return false;
 
         string actualOutputPath = outputPath ?? Path.ChangeExtension(compressedPath, extension);
         File.WriteAllBytes(actualOutputPath, result);
     }
+
+    return true;
 }
 
-    // ✅ فك ملف الأرشيف المتعدد
-
-
+    
     public void ExtractSingleFileFromArchive(string archivePath, string fileNameToExtract, string savePath)
     {
     using (var reader = new BinaryReader(File.Open(archivePath, FileMode.Open)))
@@ -454,8 +478,7 @@ public class HuffmanCompressor : ICompressor
             return path + Path.DirectorySeparatorChar;
         return path;
     }
-
-
+ 
 }
 
 public class HuffmanNode
@@ -464,4 +487,4 @@ public class HuffmanNode
     public int Frequency;
     public HuffmanNode Left;
     public HuffmanNode Right;
-}
+} 
